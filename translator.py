@@ -1,106 +1,218 @@
-# pip install googletrans
-# pip install textblob
-
 from tkinter import *
-from tkinter import ttk,messagebox
-import googletrans
-import textblob
+from tkinter import ttk, messagebox
+from translate import Translator
+from PIL import Image, ImageTk
 
+root = Tk()
+root.title("Übersetzer")
+root.geometry("1080x360")
 
-root=Tk()
-root.title("Google ÜBERSETZER")
-root.geometry("1080x400")
+# Dictionary for language codes and images
+language = {
+    'afrikaans': 'af',
+    'albanian': 'sq',
+    'arabic': 'ar',
+    'armenian': 'hy',
+    'azerbaijani': 'az',
+    'belarusian': 'be',
+    'bengali': 'bn',
+    'bosnian': 'bs',
+    'bulgarian': 'bg',
+    'catalan': 'ca',
+    'chinese (simplified)': 'zh-CN',
+    'chinese (traditional)': 'zh-TW',
+    'croatian': 'hr',
+    'czech': 'cs',
+    'danish': 'da',
+    'dutch': 'nl',
+    'english': 'en',
+    'estonian': 'et',
+    'filipino': 'tl',
+    'finnish': 'fi',
+    'french': 'fr',
+    'galician': 'gl',
+    'georgian': 'ka',
+    'german': 'de',
+    'greek': 'el',
+    'gujarati': 'gu',
+    'haitian creole': 'ht',
+    'hebrew': 'he',
+    'hindi': 'hi',
+    'hungarian': 'hu',
+    'icelandic': 'is',
+    'indonesian': 'id',
+    'irish': 'ga',
+    'italian': 'it',
+    'japanese': 'ja',
+    'javanese': 'id',
+    'kannada': 'kn',
+    'kazakh': 'kk',
+    'khmer': 'km',
+    'korean': 'ko',
+    'kurdish (kurmanji)': 'ku',
+    'kyrgyz': 'ky',
+    'latin': 'la',
+    'latvian': 'lv',
+    'lithuanian': 'lt',
+    'luxembourgish': 'lb',
+    'macedonian': 'mk',
+    'malagasy': 'mg',
+    'malay': 'ms',
+    'malayalam': 'ml',
+    'maltese': 'mt',
+    'marathi': 'mr',
+    'mongolian': 'mn',
+    'myanmar (burmese)': 'my',
+    'nepali': 'ne',
+    'norwegian': 'no',
+    'pashto': 'ps',
+    'polish': 'pl',
+    'portuguese': 'pt',
+    'punjabi': 'pa',
+    'romanian': 'ro',
+    'russian': 'ru',
+    'samoan': 'sm',
+    'scots gaelic': 'gd',
+    'serbian': 'sr',
+    'sesotho': 'st',
+    'shona': 'sn',
+    'sindhi': 'sd',
+    'sinhala': 'si',
+    'slovak': 'sk',
+    'slovenian': 'sl',
+    'somali': 'so',
+    'spanish': 'es',
+    'swedish': 'sv',
+    'tajik': 'tg',
+    'thai': 'th',
+    'turkish': 'tr',
+    'ukrainian': 'uk',
+    'uzbek': 'uz',
+    'vietnamese': 'vi',
+    'welsh': 'cy',
+    'yiddish': 'he',
+}
+
+# Function to load flag images
+def load_flag_image(lang_code):
+    path = f'img/flags/{lang_code}.png'
+    image = Image.open(path)
+    image = image.resize((20, 15), Image.BICUBIC)
+    return ImageTk.PhotoImage(image)
+
+flag_images = {lang: load_flag_image(code) for lang, code in language.items()}
 
 def label_change():
-    c=combo1.get()
-    c2=combo2.get()
+    c = combo1.get()
+    c2 = combo2.get()
     label1.configure(text=c)
     label2.configure(text=c2)
-    root.after(1000,label_change)
+    root.after(1000, label_change)
 
 def translate_now():
-    global language
     try:
-        text_=text1.get(1.0,END)
-        c3=combo1.get()
-        c4=combo2.get()
-        if(text_):
-            words=textblob.TextBlob(text)
-            lan=words.detect_language()
-            for i,j in language.items():
-                if(j==c4):
-                    lan_=i
-                words=words.translate(from_lang=lan,to=str(lan_))
-                text2.delete(1.0,END)
-                text2.insert(END,words)
+        text_ = text1.get(1.0, END).strip()
+        c3 = combo1.get()
+        c4 = combo2.get()
+
+        # Find the language codes
+        src_lang = language.get(c3, None)
+        dest_lang = language.get(c4, None)
+
+        print("Source language:", src_lang)
+        print("Destination language:", dest_lang)
+
+        if text_ and src_lang and dest_lang:
+            translator = Translator(from_lang=src_lang, to_lang=dest_lang)
+            translated_text = translator.translate(text_)
+            
+            if translated_text:
+                print("Translated text:", translated_text)
+                text2.delete(1.0, END)
+                text2.insert(END, translated_text)
+            else:
+                messagebox.showerror("Übersetzungsfehler", "Die Übersetzung konnte nicht durchgeführt werden.")
+                print("Translation failed")
+        else:
+            messagebox.showwarning("Eingabefehler", "Bitte geben Sie Text ein, der übersetzt werden soll und wählen Sie die Sprachen korrekt aus.")
     except Exception as e:
-        messagebox.showerror("googletrans","please try again")
+        messagebox.showerror("Übersetzungsfehler", f"Bitte versuche es erneut. Fehler: {e}")
+        print("Error occurred:", e)
 
+# Icon
+image_icon = PhotoImage(file="img/translate.png")
+root.iconphoto(False, image_icon)
 
-#icon
-image_icon=PhotoImage(file="translate.png")
-root.iconphoto(False,image_icon)
+# Arrow
+arrow_image = PhotoImage(file="img/arrows.png")
+image_label = Label(root, image=arrow_image, width=150)
+image_label.place(x=460, y=50)
 
-#arrow
-arrow_image=PhotoImage(file="5631.jpg")
-image_label=Label(root,image=arrow_image,width=150)
-image_label.place(x=460,y=50)
+# Custom Combobox with images
+class ImageCombobox(ttk.Combobox):
+    def __init__(self, master=None, **kwargs):
+        super().__init__(master, **kwargs)
+        self.bind("<<ComboboxSelected>>", self.on_select)
+        self.popup = None
 
+    def on_select(self, event):
+        value = self.get()
+        if value in flag_images:
+            self.icon_label.config(image=flag_images[value])
 
-language=googletrans.LANGUAGES
-languageV=list(language.values())
-lang1=language.keys()
+    def set_icon_label(self, label):
+        self.icon_label = label
 
+# Combobox 1
+combo1 = ImageCombobox(root, value=list(language.keys()), font="Roboto 14", state="readonly")
+combo1.place(x=110, y=20)
+combo1.set("german")
 
-combo1=ttk.Combobox(root,value=languageV,font="Roboto 14",state="r")
-combo1.place(x=110,y=20)
-combo1.set("DEUTSCH")
+icon_label1 = Label(root, image=flag_images['german'])
+icon_label1.place(x=80, y=23)
+combo1.set_icon_label(icon_label1)
 
-label1=Label(root,text="DEUTSCH",font="segoe 30 bold",bg="white",width=18,bd=5,relief=GROOVE)
-label1.place(x=10,y=50)
+# Combobox 2
+combo2 = ImageCombobox(root, value=list(language.keys()), font="Roboto 14", state="readonly")
+combo2.place(x=730, y=20)
+combo2.set("english")
 
-f=Frame(root,bg="Black",bd=5)
-f.place(x=10,y=118,width=440,height=210)
+icon_label2 = Label(root, image=flag_images['english'])
+icon_label2.place(x=700, y=23)
+combo2.set_icon_label(icon_label2)
 
-text1=Text(f,font="Robote 20",bg="white",relief=GROOVE,wrap=WORD)
-text1.place(x=0,y=0,width=430,height=200)
+label1 = Label(root, text="FROM", font="segoe 20", bg="orange", height=2, width=27, bd=4, relief=FLAT)
+label1.place(x=10, y=50)
 
-scrollbar1=Scrollbar(f)
-scrollbar1.pack(side="right",fill="y")
+f = Frame(root, bg="orange", bd=1)
+f.place(x=10, y=118, width=440, height=210)
 
+text1 = Text(f, font="Roboto 14", bg="white", relief=FLAT, wrap=WORD)
+text1.place(x=0, y=0, width=430, height=200)
+
+scrollbar1 = Scrollbar(f)
+scrollbar1.pack(side="right", fill="y")
 scrollbar1.configure(command=text1.yview)
 text1.configure(yscrollcommand=scrollbar1.set)
 
+label2 = Label(root, text="TO", font="segoe 20", bg="light blue", height=2, width=27, bd=1, relief=FLAT)
+label2.place(x=620, y=50)
 
-combo2=ttk.Combobox(root,value=languageV,font="RobotV 14",state="r")
-combo2.place(x=730,y=20)
-combo2.set("WÄHLE DIE SPRACHE AUS")
+f2 = Frame(root, bg="light blue", bd=1)
+f2.place(x=620, y=118, width=440, height=210)
 
-label2=Label(root,text="DEUTSCH",font="segoe 30 bold",bg="white",width=18,bd=5,relief=GROOVE)
-label2.place(x=620,y=50)
+text2 = Text(f2, font="Roboto 14", bg="white", relief=FLAT, wrap=WORD)
+text2.place(x=0, y=0, width=430, height=200)
 
-f2=Frame(root,bg="Black",bd=5)
-f2.place(x=620,y=118,width=440,height=210)
-
-text2=Text(f2,font="Robote 20",bg="white",relief=GROOVE,wrap=WORD)
-text2.place(x=0,y=0,width=430,height=200)
-
-scrollbar2=Scrollbar(f2)
-scrollbar2.pack(side="right",fill="y")
-
-scrollbar2.configure(command=text1.yview)
+scrollbar2 = Scrollbar(f2)
+scrollbar2.pack(side="right", fill="y")
+scrollbar2.configure(command=text2.yview)
 text2.configure(yscrollcommand=scrollbar2.set)
 
+root.configure(bg="#F2F2F2")
 
-
-root.configure(bg="white")
-
-#translate button
-translate=Button(root,text="Translate",font="Roboto 15 italic",activebackground="purple",cursor="hand2",bd=5,bg="red",fg="white",command=translate_now)
-translate.place(x=480,y=250)
-
-
-
-label_change()
+# Translate button
+translate = Button(root, text="Translate", font="Roboto 15 bold italic", bg="light green", command=translate_now)
+translate.place(x=480, y=200)
 
 root.mainloop()
