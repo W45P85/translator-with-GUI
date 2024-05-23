@@ -8,6 +8,10 @@
 <p>Translate nearly every language to nearly every other language. :-)</p>
 </pre>
 
+
+<img src="/img/doc/1.PNG" width="800">
+
+
 This project is a simple text translator with a graphical user interface (GUI) built using Python and the Tkinter module.
 
 ## Features
